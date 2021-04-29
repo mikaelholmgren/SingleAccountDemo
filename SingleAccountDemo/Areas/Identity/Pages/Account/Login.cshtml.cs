@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using SingleAccountDemo.Areas.Identity.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace SingleAccountDemo.Areas.Identity.Pages.Account
 {
@@ -37,7 +38,7 @@ namespace SingleAccountDemo.Areas.Identity.Pages.Account
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public string ReturnUrl { get; set; }
-
+        public bool AllowRegistration { get; private set; }
         [TempData]
         public string ErrorMessage { get; set; }
 
@@ -70,6 +71,7 @@ namespace SingleAccountDemo.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+            AllowRegistration = await _userManager.Users.CountAsync() == 0 ? true : false;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SingleAccountDemo.Areas.Identity.Data;
 
@@ -43,6 +44,7 @@ namespace SingleAccountDemo.Areas.Identity.Pages.Account
         public string ReturnUrl { get; set; }
 
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
+        public bool AllowRegistration { get; private set; }
 
         public class InputModel
         {
@@ -67,10 +69,13 @@ namespace SingleAccountDemo.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            AllowRegistration = await _userManager.Users.CountAsync() == 0 ? true : false;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            AllowRegistration = await _userManager.Users.CountAsync() == 0 ? true : false;
+            if (!AllowRegistration) return RedirectToPage("./Register");
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
